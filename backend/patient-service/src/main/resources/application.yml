@@ -1,0 +1,58 @@
+server:
+  port: ${SERVER_PORT:8081}
+  address: ${SERVER_ADDRESS:0.0.0.0}
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+
+spring:
+  application:
+    name: patient-service
+  datasource:
+    url: ${PATIENT_DB_URL:jdbc:mysql://127.0.0.1:3306/mediconnect_patient?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true}
+    username: ${PATIENT_DB_USER:patient_app}
+    password: ${PATIENT_DB_PASSWORD:local_patient_password}
+    hikari:
+      maximum-pool-size: 5
+  jpa:
+    open-in-view: false
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+  mvc:
+    problemdetails:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  paths-to-match: /api/**
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    ip-address: 127.0.0.1
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+
+logging:
+  level:
+    org.hibernate.orm.jdbc.bind: OFF
+    org.hibernate.SQL: OFF
+    org.hibernate.engine.jdbc.spi.SqlExceptionHelper: OFF
+    org.hibernate.orm.jdbc.error: OFF

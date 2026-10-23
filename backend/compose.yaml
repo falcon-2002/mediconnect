@@ -1,0 +1,39 @@
+services:
+  patient-db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: mediconnect_patient
+      MYSQL_USER: patient_app
+      MYSQL_PASSWORD: ${PATIENT_DB_PASSWORD:-local_patient_password}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-local_root_password}
+      TZ: UTC
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_as_cs"]
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - patient-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_PASSWORD mysql -h 127.0.0.1 -u $$MYSQL_USER -D $$MYSQL_DATABASE -e 'SELECT 1' >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  patient-service:
+    profiles: ["full"]
+    build:
+      context: .
+      dockerfile: patient-service/Dockerfile
+    environment:
+      SERVER_ADDRESS: 0.0.0.0
+      PATIENT_DB_URL: jdbc:mysql://patient-db:3306/mediconnect_patient?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
+      PATIENT_DB_USER: patient_app
+      PATIENT_DB_PASSWORD: ${PATIENT_DB_PASSWORD:-local_patient_password}
+    ports:
+      - "127.0.0.1:8081:8081"
+    depends_on:
+      patient-db:
+        condition: service_healthy
+
+volumes:
+  patient-data:

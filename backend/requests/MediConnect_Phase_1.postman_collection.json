@@ -1,0 +1,106 @@
+{
+  "info": {
+    "name": "MediConnect Phase 1 \u2014 Patients",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "patientId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1 Health",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/actuator/health",
+        "header": []
+      }
+    },
+    {
+      "name": "2 Create patient (saves patientId)",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/patients",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullName\": \"Demo Patient\",\n  \"email\": \"demo.patient@example.com\",\n  \"phone\": \"9876543210\",\n  \"dateOfBirth\": \"1995-09-09\",\n  \"address\": \"Demo Road, Rourkela\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Created', () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set('patientId', pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 List patients",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/patients?page=0&size=20",
+        "header": []
+      }
+    },
+    {
+      "name": "4 Get patient",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/patients/{{patientId}}",
+        "header": []
+      }
+    },
+    {
+      "name": "5 Update patient (version 0 initially)",
+      "request": {
+        "method": "PUT",
+        "url": "{{baseUrl}}/api/patients/{{patientId}}",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullName\": \"Demo Patient Updated\",\n  \"email\": \"demo.patient@example.com\",\n  \"phone\": \"9876543210\",\n  \"dateOfBirth\": \"1995-09-09\",\n  \"address\": \"Demo Road, Rourkela\",\n  \"version\": 0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "6 Deactivate patient",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/api/patients/{{patientId}}",
+        "header": []
+      }
+    }
+  ]
+}

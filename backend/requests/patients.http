@@ -1,0 +1,54 @@
+@baseUrl = http://localhost:8081
+@patientId = REPLACE_WITH_ID_FROM_CREATE_RESPONSE
+
+### 1. Health: expect 200 and status UP
+GET {{baseUrl}}/actuator/health
+
+### 2. Create: expect 201 and Location header (fictional data)
+POST {{baseUrl}}/api/patients
+Content-Type: application/json
+
+{
+  "fullName": "Demo Patient",
+  "email": "demo.patient@example.com",
+  "phone": "9876543210",
+  "dateOfBirth": "1995-09-09",
+  "address": "Demo Road, Rourkela"
+}
+
+### 3. List: expect 200, items array and totalItems
+GET {{baseUrl}}/api/patients?page=0&size=20
+
+### 4. Get: paste the returned UUID into patientId above
+GET {{baseUrl}}/api/patients/{{patientId}}
+
+### 5. Update: use the version from your most recent GET; initially 0
+PUT {{baseUrl}}/api/patients/{{patientId}}
+Content-Type: application/json
+
+{
+  "fullName": "Demo Patient Updated",
+  "email": "demo.patient@example.com",
+  "phone": "9876543210",
+  "dateOfBirth": "1995-09-09",
+  "address": "Updated Demo Road, Rourkela",
+  "version": 0
+}
+
+### 6. Run create again: expect 409 duplicate email
+### Run the update again with version 0: expect 409 stale version
+
+### 7. Invalid details: expect 400 with fieldErrors
+POST {{baseUrl}}/api/patients
+Content-Type: application/json
+
+{
+  "fullName": "",
+  "email": "not-an-email",
+  "phone": "123",
+  "dateOfBirth": "2999-01-01",
+  "address": ""
+}
+
+### 8. Deactivate: expect 204; later GET should be 404
+DELETE {{baseUrl}}/api/patients/{{patientId}}

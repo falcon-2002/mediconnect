@@ -1,0 +1,28 @@
+# Frontend dependencies and build output
+node_modules/
+dist/
+build/
+coverage/
+
+# Java build output
+target/
+*.log
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+application-local.yml
+application-local.properties
+*.pem
+*.key
+
+# Editor and operating system files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Old project copy
+/backend ph-2/
