@@ -56,3 +56,9 @@ logging:
     org.hibernate.SQL: OFF
     org.hibernate.engine.jdbc.spi.SqlExceptionHelper: OFF
     org.hibernate.orm.jdbc.error: OFF
+
+
+security:
+  jwt:
+    issuer: ${JWT_ISSUER:mediconnect-auth}
+    public-key: ${JWT_PUBLIC_KEY}

@@ -28,4 +28,8 @@ Thumbs.db
 /backend ph-2/
 
 # Runtime logs
-logs/
+logs/
+
+# Runtime signing keys; public test fixtures are deliberate.
+*.pem
+!backend/*/src/test/resources/test-*.pem

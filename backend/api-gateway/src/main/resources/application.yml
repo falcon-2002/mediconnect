@@ -13,13 +13,11 @@ spring:
             - id: patient-service
               uri: lb://PATIENT-SERVICE
               predicates:
-                - Path=/api/patients/**
-      mvc:
-        routes:
-          - id: patient-service
-            uri: lb://PATIENT-SERVICE
-            predicates:
-              - Path=/api/patients/**
+                - Path=/api/patients,/api/patients/**
+            - id: auth-service
+              uri: lb://AUTH-SERVICE
+              predicates:
+                - Path=/api/auth/**
 
 eureka:
   client:
@@ -38,3 +36,4 @@ management:
 logging:
   level:
     org.springframework.cloud.gateway: INFO
+

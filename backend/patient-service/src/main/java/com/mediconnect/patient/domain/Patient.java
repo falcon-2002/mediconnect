@@ -17,6 +17,12 @@ public class Patient {
     @Column(nullable = false, updatable = false)
     private UUID id;
 
+    @JdbcTypeCode(SqlTypes.BINARY)
+    @Column(name="account_id", unique=true, updatable=false)
+    private UUID accountId;
+
+    public void assignAccount(UUID accountId) { this.accountId=accountId; }
+
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
@@ -84,3 +90,4 @@ public class Patient {
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
 }
+
