@@ -1,3 +1,5 @@
+> **Phase 3:** For current authentication, keys, startup and verification instructions, see [docs/PHASE_3.md](docs/PHASE_3.md). Earlier unauthenticated examples below describe Phase 1.
+
 # MediConnect backend — Phase 1: Patient service
 
 Your frontend runs. This phase creates the first real backend service with Spring Boot and MySQL. It is a separate backend addition; the existing frontend source is not replaced.
@@ -219,3 +221,4 @@ The reviewed Java reference uses controller/service/repository/DTO layers, Postg
 | Existing frontend still shows demo data | Expected: the frontend is not connected in Phase 1 |
 
 Official references: https://docs.spring.io/spring-boot/system-requirements.html · https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html · https://springdoc.org/ · https://java.testcontainers.org/modules/databases/mysql/
+

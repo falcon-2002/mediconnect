@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:patient_test;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+eureka:
+  client:
+    enabled: false
+
+security:
+  jwt:
+    issuer: mediconnect-auth
+    public-key: classpath:test-public.pem
+    private-key: classpath:test-private.pem

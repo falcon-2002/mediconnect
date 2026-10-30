@@ -11,5 +11,7 @@ public interface PatientRepository extends JpaRepository<Patient, UUID> {
     Optional<Patient> findByIdAndActiveTrue(UUID id);
     Page<Patient> findByActiveTrue(Pageable pageable);
     boolean existsByEmail(String email);
+    boolean existsByIdAndAccountId(UUID id, UUID accountId);
     boolean existsByEmailAndIdNot(String email, UUID id);
 }
+

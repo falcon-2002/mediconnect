@@ -8,3 +8,9 @@ spring:
 eureka:
   client:
     enabled: false
+
+security:
+  jwt:
+    issuer: mediconnect-auth
+    public-key: classpath:test-public.pem
+    private-key: classpath:test-private.pem

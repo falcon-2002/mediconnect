@@ -19,12 +19,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 // This contract runs against H2 by default and against real MySQL with -Pmysql-it.
+@org.springframework.security.test.context.support.WithMockUser(roles="ADMIN")
 abstract class PatientApiContract {
     @Autowired MockMvc mvc;
     @Autowired PatientRepository repository;
+    @Autowired org.springframework.web.context.WebApplicationContext context;
 
     @BeforeEach
-    void resetDatabase() { repository.deleteAll(); }
+    void resetDatabase() {
+        repository.deleteAll();
+        mvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup(context)
+                .apply(org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity()).build();
+    }
 
     static String createJson(String email) {
         return """
@@ -173,3 +179,4 @@ abstract class PatientApiContract {
         assertThat(parsedCreated).isEqualTo(parsedCreated.truncatedTo(ChronoUnit.MICROS));
     }
 }
+
