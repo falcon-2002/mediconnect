@@ -1,16 +1,21 @@
 @echo off
-echo Stopping all MediConnect services...
-FOR /F "tokens=5" %%P IN ('netstat -ano ^| findstr ":8761 " 2^>nul') DO (
-    IF NOT "%%P"=="0" (echo Killing PID %%P on :8761 & taskkill /PID %%P /F >nul 2>&1)
+setlocal
+set "SCRIPT_DIR=%~dp0"
+
+REM MediConnect - Stop All Services
+REM Stops MediConnect services safely by verifying process identity and project ownership.
+REM Verifies each candidate process belongs to this project before stopping it,
+REM using its executable and command line containing the exact project JAR path.
+REM Skips and reports any process that cannot be verified to protect unrelated applications.
+
+where powershell.exe >nul 2>&1
+if errorlevel 1 (
+    echo [ERROR] powershell.exe was not found in PATH.
+    echo PowerShell is required to safely inspect process command lines and verify ownership.
+    exit /b 1
 )
-FOR /F "tokens=5" %%P IN ('netstat -ano ^| findstr ":8081 " 2^>nul') DO (
-    IF NOT "%%P"=="0" (echo Killing PID %%P on :8081 & taskkill /PID %%P /F >nul 2>&1)
-)
-FOR /F "tokens=5" %%P IN ('netstat -ano ^| findstr ":8080 " 2^>nul') DO (
-    IF NOT "%%P"=="0" (echo Killing PID %%P on :8080 & taskkill /PID %%P /F >nul 2>&1)
-)
-FOR /F "tokens=5" %%P IN ('netstat -ano ^| findstr ":5173 " 2^>nul') DO (
-    IF NOT "%%P"=="0" (echo Killing PID %%P on :5173 & taskkill /PID %%P /F >nul 2>&1)
-)
-echo Done.
-pause
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%stop-all.ps1" %*
+set "EXIT_CODE=%ERRORLEVEL%"
+
+exit /b %EXIT_CODE%

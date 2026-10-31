@@ -18,6 +18,12 @@ spring:
               uri: lb://AUTH-SERVICE
               predicates:
                 - Path=/api/auth/**
+            - id: doctor-service
+              uri: lb://DOCTOR-SERVICE
+              predicates:
+                - Path=/api/doctors,/api/doctors/**
+              filters:
+                - PreserveHostHeader
 
 eureka:
   client:
