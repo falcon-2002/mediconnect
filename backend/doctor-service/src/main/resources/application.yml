@@ -1,0 +1,49 @@
+server:
+  port: ${SERVER_PORT:8083}
+  address: ${SERVER_ADDRESS:127.0.0.1}
+spring:
+  application:
+    name: doctor-service
+  datasource:
+    url: ${DOCTOR_DB_URL:jdbc:mysql://127.0.0.1:3306/mediconnect_doctor?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true}
+    username: ${DOCTOR_DB_USER:doctor_app}
+    password: ${DOCTOR_DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 5
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+  mvc:
+    problemdetails:
+      enabled: true
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+    ip-address: ${SERVICE_IP:127.0.0.1}
+security:
+  jwt:
+    issuer: ${JWT_ISSUER:mediconnect-auth}
+    public-key: ${JWT_PUBLIC_KEY}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+doctor:
+  catalog:
+    specialties:
+      general: General physician
+      dental: Dentist
+      skin: Dermatologist
+      pediatric: Pediatrician
+      gynecology: Gynecologist
+      ent: ENT specialist
+    cities: [Rourkela, Bengaluru, Bhubaneswar]

@@ -38,11 +38,17 @@ class GatewayRoutingTest {
             if(key.toString().startsWith("spring.cloud.gateway.server.webmvc.routes"))
                 properties.add(key.toString(),()->value);
         });
-        for(int index=0;index<2;index++) properties.add(
+        for(int index=0;index<3;index++) properties.add(
             "spring.cloud.gateway.server.webmvc.routes["+index+"].uri",
             () -> "http://127.0.0.1:"+downstream.getAddress().getPort());
     }
     @AfterAll static void stop(){downstream.stop(0);}
+    @Test void doctorRouteIsPublicAndPreservesPath() throws Exception {
+        var request=HttpRequest.newBuilder(URI.create("http://127.0.0.1:"+port+"/api/doctors/catalog")).GET().build();
+        var response=HttpClient.newHttpClient().send(request,HttpResponse.BodyHandlers.ofString());
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.body()).isEqualTo("GET /api/doctors/catalog null");
+    }
     @Test void patientRoutePreservesBearerToken() throws Exception {
         var request=HttpRequest.newBuilder(URI.create("http://127.0.0.1:"+port+"/api/patients"))
                 .header("Authorization","Bearer test-forwarding-only").GET().build();

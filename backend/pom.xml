@@ -17,6 +17,7 @@
     </dependencies>
   </dependencyManagement>
   <modules>
+    <module>doctor-service</module>
     <module>auth-service</module>
     <module>patient-service</module>
     <module>discovery-server</module>
