@@ -30,6 +30,7 @@ $services = [ordered]@{
     "AuthService"    = @{ Port = 8082; Jar = (Join-Path $backend "auth-service\target\auth-service-0.1.0-SNAPSHOT.jar");       Log = (Join-Path $logDir "auth-service.log"); HealthUrl = "http://127.0.0.1:8082/actuator/health" }
     "PatientService" = @{ Port = 8081; Jar = (Join-Path $backend "patient-service\target\patient-service-0.1.0-SNAPSHOT.jar"); Log = (Join-Path $logDir "patient-service.log"); HealthUrl = "http://127.0.0.1:8081/actuator/health" }
     "DoctorService"  = @{ Port = 8083; Jar = (Join-Path $backend "doctor-service\target\doctor-service-0.1.0-SNAPSHOT.jar");   Log = (Join-Path $logDir "doctor-service.log"); HealthUrl = "http://127.0.0.1:8083/actuator/health" }
+    "AppointmentService"  = @{ Port = 8084; Jar = (Join-Path $backend "appointment-service\target\appointment-service-0.1.0-SNAPSHOT.jar");   Log = (Join-Path $logDir "appointment-service.log"); HealthUrl = "http://127.0.0.1:8084/actuator/health" }
     "APIGateway"     = @{ Port = 8080; Jar = (Join-Path $backend "api-gateway\target\api-gateway-0.1.0-SNAPSHOT.jar");       Log = (Join-Path $logDir "api-gateway.log"); HealthUrl = "http://127.0.0.1:8080/actuator/health" }
 }
 
@@ -55,12 +56,8 @@ function Get-PortPID($port) {
 }
 
 function Stop-PortProcess($port, $name) {
-    $p = Get-PortPID $port
-    if ($p) {
-        Write-Host "Stopping existing process for $name on port $port (PID $p)..."
-        Stop-Process -Id $p -Force -ErrorAction SilentlyContinue
-        Start-Sleep -Seconds 1
-    }
+    & (Join-Path $root "stop-all.ps1") -Service $name
+    if (Get-PortPID $port) { throw "Port $port is still occupied; refusing to replace an unverified process." }
 }
 
 function Test-ServiceHealth($url, $isEureka = $false) {
@@ -161,6 +158,11 @@ if (-not $env:DOCTOR_DB_PASSWORD) {
     $env:DOCTOR_DB_PASSWORD = [System.Net.NetworkCredential]::new("", $sec).Password
 }
 
+if (-not $env:APPOINTMENT_DB_PASSWORD) {
+    $sec = Read-Host "Enter Appointment Service DB password (appointment_app)" -AsSecureString
+    $env:APPOINTMENT_DB_PASSWORD = [System.Net.NetworkCredential]::new("", $sec).Password
+}
+
 # --- Keys configuration ---
 # Auth Service needs private and public key. Patient and Doctor services need ONLY public key.
 $keyDir = "C:/Users/hp/.mediconnect-keys"
@@ -191,7 +193,7 @@ foreach ($svcName in $services.Keys) {
     }
 
     # Configure service-specific environment variables
-    $svcEnv = @{}
+    $svcEnv = @{ "JWT_PRIVATE_KEY" = $null }
     switch ($svcName) {
         "Eureka" {
             # No special env vars needed
@@ -218,6 +220,14 @@ foreach ($svcName in $services.Keys) {
             if ($env:DOCTOR_DB_USER) { $svcEnv["DOCTOR_DB_USER"] = $env:DOCTOR_DB_USER }
             if ($env:DOCTOR_DB_URL)  { $svcEnv["DOCTOR_DB_URL"]  = $env:DOCTOR_DB_URL }
             # Doctor Service receives ONLY JWT_PUBLIC_KEY (no private key)
+            $svcEnv["JWT_PUBLIC_KEY"]     = $publicKeyPath
+            $svcEnv["JWT_ISSUER"]         = $jwtIssuer
+        }
+        "AppointmentService" {
+            $svcEnv["APPOINTMENT_DB_PASSWORD"] = $env:APPOINTMENT_DB_PASSWORD
+            if ($env:APPOINTMENT_DB_USER) { $svcEnv["APPOINTMENT_DB_USER"] = $env:APPOINTMENT_DB_USER }
+            if ($env:APPOINTMENT_DB_URL)  { $svcEnv["APPOINTMENT_DB_URL"]  = $env:APPOINTMENT_DB_URL }
+            # Appointment Service receives ONLY JWT_PUBLIC_KEY (no private key)
             $svcEnv["JWT_PUBLIC_KEY"]     = $publicKeyPath
             $svcEnv["JWT_ISSUER"]         = $jwtIssuer
         }

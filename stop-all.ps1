@@ -48,6 +48,12 @@ $serviceDefs = [ordered]@{
         JarRel     = "backend\doctor-service\target\doctor-service-0.1.0-SNAPSHOT.jar"
         JarName    = "doctor-service-0.1.0-SNAPSHOT.jar"
     }
+    "AppointmentService" = @{
+        Port       = 8084
+        Type       = "java"
+        JarRel     = "backend\appointment-service\target\appointment-service-0.1.0-SNAPSHOT.jar"
+        JarName    = "appointment-service-0.1.0-SNAPSHOT.jar"
+    }
     "APIGateway" = @{
         Port       = 8080
         Type       = "java"
