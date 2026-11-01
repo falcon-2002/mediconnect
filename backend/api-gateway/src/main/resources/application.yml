@@ -10,6 +10,12 @@ spring:
       server:
         webmvc:
           routes:
+            - id: appointment-service
+              uri: lb://APPOINTMENT-SERVICE
+              predicates:
+                - Path=/api/appointments,/api/appointments/**,/api/slots,/api/slots/**
+              filters:
+                - PreserveHostHeader
             - id: patient-service
               uri: lb://PATIENT-SERVICE
               predicates:
@@ -42,4 +48,3 @@ management:
 logging:
   level:
     org.springframework.cloud.gateway: INFO
-

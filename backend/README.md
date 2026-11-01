@@ -222,3 +222,8 @@ The reviewed Java reference uses controller/service/repository/DTO layers, Postg
 
 Official references: https://docs.spring.io/spring-boot/system-requirements.html · https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html · https://springdoc.org/ · https://java.testcontainers.org/modules/databases/mysql/
 
+
+
+## Phase 5: Appointments
+
+See [docs/PHASE_5.md](docs/PHASE_5.md) for Appointment Service on 8084, local MySQL setup, booking/cancellation API, concurrency design and the Docker-free MySQL test profile. Frontend integration remains a separate phase.
