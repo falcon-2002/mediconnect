@@ -82,6 +82,7 @@ mediconnect/
 ├── start-all.ps1
 └── stop-all.bat
 ```
+[![Architecture diagram](https://gitdiagram.com/diagram-badge.svg)](https://gitdiagram.com/falcon-2002/mediconnect?utm_source=readme&utm_medium=badge)
 
 ## Running Locally
 
@@ -166,4 +167,4 @@ GitHub: [falcon-2002](https://github.com/falcon-2002)
 
 Linked In :[https://www.linkedin.com/in/satya-prakash-mohapatra]
 
-[![Architecture diagram](https://gitdiagram.com/diagram-badge.svg)](https://gitdiagram.com/falcon-2002/mediconnect?utm_source=readme&utm_medium=badge)
+
