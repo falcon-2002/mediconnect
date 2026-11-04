@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
-import { specialtyLabel } from "../../config/catalog";
+import { useCatalog } from "../../app/CatalogProvider";
 import { Avatar } from "../../shared/Avatar";
 import { formatFee } from "../../shared/date";
 import type { Doctor } from "./model";
 
 export function DoctorCard({ doctor }: { doctor: Doctor }) {
+  const { label: specialtyLabel } = useCatalog();
   return (
     <article className="doctor-card">
       <div className="doctor-top">

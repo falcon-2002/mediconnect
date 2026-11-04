@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useRepository } from "../../app/RepositoryProvider";
-import { specialtyLabel } from "../../config/catalog";
+import { useCatalog } from "../../app/CatalogProvider";
 import { Avatar } from "../../shared/Avatar";
 import { Status } from "../../shared/Status";
 import { useAsync } from "../../shared/useAsync";
@@ -13,6 +13,7 @@ import {
 } from "../../shared/date";
 
 export function ProfilePage() {
+  const { label: specialtyLabel } = useCatalog();
   const { doctorId = "" } = useParams();
   const repository = useRepository();
   const load = useCallback(async () => {
@@ -85,8 +86,8 @@ export function ProfilePage() {
                 </strong>
               </section>
               <p className="muted">
-                This is a fictional doctor profile for the MediConnect learning
-                demo.
+                This profile is provided by the MediConnect doctor service. This
+                local learning project does not contact a real clinic.
               </p>
             </div>
             <aside className="booking-panel">

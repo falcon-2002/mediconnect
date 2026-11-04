@@ -1,10 +1,8 @@
-import type { City, SpecialtyId } from "../../config/catalog";
-
 export interface Doctor {
   id: string;
   name: string;
-  specialty: SpecialtyId;
-  city: City;
+  specialty: string;
+  city: string;
   area: string;
   clinic: string;
   qualifications: string;

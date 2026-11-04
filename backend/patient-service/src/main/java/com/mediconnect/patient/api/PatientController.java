@@ -30,6 +30,12 @@ public class PatientController {
     @Operation(summary = "Fetch one active patient")
     public PatientResponse get(@PathVariable UUID id) { return service.get(id); }
 
+    @GetMapping("/me")
+    @Operation(summary = "Fetch the signed-in patient's active profile")
+    public ResponseEntity<PatientResponse> me() {
+        return ResponseEntity.ok().cacheControl(org.springframework.http.CacheControl.noStore()).body(service.me());
+    }
+
     @PostMapping
     @Operation(summary = "Create a patient")
     public ResponseEntity<PatientResponse> create(@Valid @RequestBody CreatePatientRequest request) {

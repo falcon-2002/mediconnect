@@ -1,28 +1,28 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useRepository } from "../../app/RepositoryProvider";
 import { useAsync } from "../../shared/useAsync";
 import { Status } from "../../shared/Status";
 import { formatDate, formatTime } from "../../shared/date";
 import { Avatar } from "../../shared/Avatar";
-
+import { Pagination } from "../../shared/Pagination";
 export function AppointmentsPage() {
   const repository = useRepository();
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const confirmed = params.get("confirmed");
-  const load = useCallback(
-    async () => ({
-      appointments: await repository.listAppointments(),
-      doctors: await repository.listDoctors(),
-    }),
-    [repository],
+  const rawPage = Number(params.get("page") ?? 0);
+  const page = Number.isSafeInteger(rawPage) && rawPage >= 0 ? rawPage : 0;
+  const state = useAsync(
+    useCallback(() => repository.listAppointments(page), [repository, page]),
   );
-  const state = useAsync(load);
   const [pendingCancel, setPendingCancel] = useState("");
   const [busy, setBusy] = useState("");
+  const sending = useRef(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   async function cancel(id: string) {
+    if (sending.current) return;
+    sending.current = true;
     setBusy(id);
     setError("");
     try {
@@ -32,7 +32,9 @@ export function AppointmentsPage() {
       state.refresh();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Could not cancel.");
+      state.refresh();
     } finally {
+      sending.current = false;
       setBusy("");
     }
   }
@@ -41,13 +43,13 @@ export function AppointmentsPage() {
       <div className="page-title">
         <span className="eyebrow">YOUR CARE, PLANNED</span>
         <h1>My appointments</h1>
-        <p>A little less to keep in your head.</p>
+        <p>Appointments saved to your patient account.</p>
       </div>
-      {state.data?.appointments.some(
-        (a) => a.id === confirmed && a.status === "confirmed",
+      {state.data?.items.some(
+        (a) => a.id === confirmed && a.status === "BOOKED",
       ) && (
         <div className="success" role="status">
-          <strong>✓ Your demo appointment is confirmed.</strong>
+          <strong>✓ Your appointment is confirmed.</strong>
           <p>You can review it below. No real clinic has been contacted.</p>
         </div>
       )}
@@ -67,78 +69,104 @@ export function AppointmentsPage() {
         retry={state.refresh}
       />
       {!state.loading && !state.error && (
-        <div className="appointment-list">
-          {!state.data?.appointments.length && (
-            <div className="empty">
-              <h2>Your next visit starts here.</h2>
-              <p>Find a doctor and choose an appointment time.</p>
-              <Link className="button" to="/doctors">
-                Explore doctors ↗
-              </Link>
-            </div>
-          )}
-          {state.data?.appointments.map((appointment) => {
-            const doctor = state.data?.doctors.find(
-              (item) => item.id === appointment.doctorId,
-            );
-            return (
+        <>
+          <div className="appointment-list">
+            {!state.data?.items.length && (
+              <div className="empty">
+                <h2>No appointments on this page.</h2>
+                <p>Find a doctor and choose an appointment time.</p>
+                <Link className="button" to="/doctors">
+                  Explore doctors ↗
+                </Link>
+                <p>
+                  <Link to="/profile">View or set up my profile</Link>
+                </p>
+              </div>
+            )}
+            {state.data?.items.map((appointment) => (
               <article className="appointment-card" key={appointment.id}>
-                {doctor && <Avatar doctor={doctor} />}
+                {appointment.doctor && <Avatar doctor={appointment.doctor} />}
                 <div className="appointment-info">
-                  <span className={`badge ${appointment.status}`}>
-                    {appointment.status}
+                  <span
+                    className={`badge ${appointment.status === "BOOKED" ? "confirmed" : "cancelled"}`}
+                  >
+                    {appointment.status === "BOOKED"
+                      ? "confirmed"
+                      : "cancelled"}
                   </span>
-                  <h2>{doctor?.name || "Doctor unavailable"}</h2>
-                  <p>
-                    {doctor?.clinic} · {doctor?.city}
-                  </p>
-                  <strong>
-                    {formatDate(appointment.startsAt)} ·{" "}
-                    {formatTime(appointment.startsAt)} IST
-                  </strong>
-                  <p>
-                    For {appointment.patientName} · Reference{" "}
-                    {appointment.id.slice(0, 8)}
-                  </p>
+                  <h2>
+                    {appointment.doctor?.name ?? "Doctor details unavailable"}
+                  </h2>
+                  {appointment.doctor && (
+                    <p>
+                      {appointment.doctor.clinic} · {appointment.doctor.city}
+                    </p>
+                  )}
+                  {appointment.slot && (
+                    <strong>
+                      {formatDate(appointment.slot.startsAt)} ·{" "}
+                      {formatTime(appointment.slot.startsAt)} IST
+                    </strong>
+                  )}
+                  <p>Reference {appointment.id}</p>
+                  {appointment.detailsUnavailable && (
+                    <p className="muted">
+                      Some visit details could not be loaded. Your appointment
+                      record is still saved.
+                    </p>
+                  )}
                 </div>
-                {appointment.status === "confirmed" && (
-                  <div className="cancel-actions">
-                    {pendingCancel === appointment.id ? (
-                      <>
-                        <p>Cancel this demo appointment?</p>
+                {appointment.status === "BOOKED" &&
+                  (!appointment.slot ||
+                    Date.parse(appointment.slot.startsAt) > Date.now()) && (
+                    <div className="cancel-actions">
+                      {pendingCancel === appointment.id ? (
+                        <>
+                          <p>Cancel this appointment?</p>
+                          <button
+                            className="button danger"
+                            disabled={Boolean(busy)}
+                            onClick={() => void cancel(appointment.id)}
+                          >
+                            {busy === appointment.id
+                              ? "Cancelling…"
+                              : "Yes, cancel"}
+                          </button>
+                          <button
+                            className="text-link"
+                            disabled={Boolean(busy)}
+                            onClick={() => setPendingCancel("")}
+                          >
+                            Keep appointment
+                          </button>
+                        </>
+                      ) : (
                         <button
-                          className="button danger"
-                          disabled={busy === appointment.id}
-                          onClick={() => void cancel(appointment.id)}
-                        >
-                          {busy ? "Cancelling…" : "Yes, cancel"}
-                        </button>
-                        <button
-                          className="text-link"
+                          className="button secondary"
                           disabled={Boolean(busy)}
-                          onClick={() => setPendingCancel("")}
+                          onClick={() => setPendingCancel(appointment.id)}
                         >
-                          Keep appointment
+                          Cancel appointment
                         </button>
-                      </>
-                    ) : (
-                      <button
-                        className="button secondary"
-                        onClick={() => setPendingCancel(appointment.id)}
-                      >
-                        Cancel appointment
-                      </button>
-                    )}
-                  </div>
-                )}
+                      )}
+                    </div>
+                  )}
               </article>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+          <Pagination
+            page={page}
+            totalPages={state.data?.totalPages ?? 0}
+            onChange={(p) => {
+              setPendingCancel("");
+              setParams({ page: String(p) });
+            }}
+          />
+        </>
       )}
       <p className="muted">
-        Demo appointments belong to this tab’s session. They are not a real
-        patient account.
+        Dates and times are shown in India Standard Time. Started appointments
+        cannot be cancelled.
       </p>
     </section>
   );

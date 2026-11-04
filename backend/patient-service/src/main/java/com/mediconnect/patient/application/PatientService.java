@@ -29,6 +29,12 @@ public class PatientService {
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN') or (hasRole('PATIENT') and @patientAccess.owns(#id))")
     public PatientResponse get(UUID id) { return PatientResponse.from(requireActive(id)); }
 
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('PATIENT')")
+    public PatientResponse me() {
+        return repository.findByAccountIdAndActiveTrue(access.accountId())
+                .map(PatientResponse::from).orElseThrow(() -> new PatientException(NOT_FOUND));
+    }
+
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public PatientPage list(int page, int size) {
         var result = repository.findByActiveTrue(PageRequest.of(page, size,

@@ -1,17 +1,29 @@
 import { useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { locations, specialties } from "../../config/catalog";
+import { specialties as presentation } from "../../config/catalog";
+import { useCatalog } from "../../app/CatalogProvider";
+import { Pagination } from "../../shared/Pagination";
 import { useRepository } from "../../app/RepositoryProvider";
 import { useAsync } from "../../shared/useAsync";
 import { Status } from "../../shared/Status";
 import { DoctorCard } from "./DoctorCard";
-import { searchDoctors } from "./search";
+
 import type { DoctorSort } from "./model";
 
 export function DiscoveryPage() {
   const repository = useRepository();
-  const load = useCallback(() => repository.listDoctors(), [repository]);
-  const state = useAsync(load);
+  const catalog = useCatalog();
+  const locations = catalog.data?.cities ?? [];
+  const specialties = Object.entries(catalog.data?.specialties ?? {}).map(
+    ([id, label]) => ({
+      id,
+      label,
+      symbol: presentation.find((s) => s.id === id)?.symbol ?? "✚",
+      hint:
+        presentation.find((s) => s.id === id)?.hint ??
+        "Explore available doctors",
+    }),
+  );
   const [params, setParams] = useSearchParams();
   const query = params.get("q") || "";
   const city = params.get("city") || "";
@@ -22,17 +34,20 @@ export function DiscoveryPage() {
   const fee = Number(params.get("fee"));
   const maxFee =
     params.has("fee") && Number.isFinite(fee) && fee >= 0 ? fee : undefined;
-  const results = searchDoctors(state.data || [], {
-    query,
-    city,
-    specialty,
-    sort,
-    maxFee,
-  });
+  const rawPage = Number(params.get("page") ?? 0);
+  const page = Number.isSafeInteger(rawPage) && rawPage >= 0 ? rawPage : 0;
+  const load = useCallback(
+    () =>
+      repository.searchDoctors({ query, city, specialty, sort, maxFee }, page),
+    [repository, query, city, specialty, sort, maxFee, page],
+  );
+  const state = useAsync(load);
+  const results = state.data?.items ?? [];
   const change = (key: string, value: string) =>
     setParams(
       (previous) => {
         const next = new URLSearchParams(previous);
+        if (key !== "page") next.delete("page");
         if (value) next.set(key, value);
         else next.delete(key);
         return next;
@@ -67,6 +82,11 @@ export function DiscoveryPage() {
           <span className="art-caption">Care starts with a connection.</span>
         </div>
       </section>
+      <Status
+        loading={catalog.loading}
+        error={catalog.error}
+        retry={catalog.refresh}
+      />
       <section className="search-panel" aria-label="Doctor search">
         <label>
           <span>YOUR LOCATION</span>
@@ -89,6 +109,7 @@ export function DiscoveryPage() {
           <input
             aria-label="Search doctors or clinics"
             placeholder="Doctor, specialty, or clinic"
+            maxLength={200}
             value={query}
             onChange={(e) => change("q", e.target.value)}
           />
@@ -177,7 +198,7 @@ export function DiscoveryPage() {
               <p aria-live="polite">
                 {state.loading
                   ? "Loading doctors…"
-                  : `${results.length} doctors${city ? ` in ${city}` : " across our demo locations"}`}
+                  : `${state.data?.totalItems ?? 0} doctors${city ? ` in ${city}` : " across our locations"}`}
               </p>
             </div>
             <label className="sort">
@@ -199,26 +220,33 @@ export function DiscoveryPage() {
             retry={state.refresh}
           />
           {!state.loading && !state.error && (
-            <div className="doctor-grid">
-              {results.map((doctor) => (
-                <DoctorCard key={doctor.id} doctor={doctor} />
-              ))}
-              {!results.length && (
-                <div className="empty">
-                  <h3>A wider search may help.</h3>
-                  <p>
-                    Try another specialty, a different city, or a higher fee
-                    limit.
-                  </p>
-                  <button
-                    className="button secondary"
-                    onClick={() => setParams({})}
-                  >
-                    Show all doctors
-                  </button>
-                </div>
-              )}
-            </div>
+            <>
+              <div className="doctor-grid">
+                {results.map((doctor) => (
+                  <DoctorCard key={doctor.id} doctor={doctor} />
+                ))}
+                {!results.length && (
+                  <div className="empty">
+                    <h3>A wider search may help.</h3>
+                    <p>
+                      Try another specialty, a different city, or a higher fee
+                      limit.
+                    </p>
+                    <button
+                      className="button secondary"
+                      onClick={() => setParams({})}
+                    >
+                      Show all doctors
+                    </button>
+                  </div>
+                )}
+              </div>
+              <Pagination
+                page={page}
+                totalPages={state.data?.totalPages ?? 0}
+                onChange={(p) => change("page", String(p))}
+              />
+            </>
           )}
         </div>
       </section>
