@@ -227,3 +227,10 @@ Official references: https://docs.spring.io/spring-boot/system-requirements.html
 ## Phase 5: Appointments
 
 See [docs/PHASE_5.md](docs/PHASE_5.md) for Appointment Service on 8084, local MySQL setup, booking/cancellation API, concurrency design and the Docker-free MySQL test profile. Frontend integration remains a separate phase.
+
+
+## Phase 6 — frontend integration
+
+The React frontend now connects through the existing gateway for authentication, doctor discovery, patient-profile setup and appointment booking/cancellation. Patient Service adds `GET /api/patients/me` (PATIENT role only), selecting the active profile by the JWT account subject. It returns 404 if no active owned profile exists; it never claims unassigned records by email. No migration or database credentials change.
+
+See [PHASE_6.md](docs/PHASE_6.md) for architecture decisions, build/restart commands, API mapping and the local verification checklist. Rebuild/restart Patient Service before running the updated frontend.

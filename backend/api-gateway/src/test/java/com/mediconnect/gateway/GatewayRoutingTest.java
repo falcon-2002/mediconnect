@@ -71,4 +71,12 @@ class GatewayRoutingTest {
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.body()).isEqualTo("POST /api/auth/login null");
     }
+
+    @Test void currentPatientRoutePreservesBearerAndPath() throws Exception {
+        var request=HttpRequest.newBuilder(URI.create("http://127.0.0.1:"+port+"/api/patients/me"))
+                .header("Authorization","Bearer test-forwarding-only").GET().build();
+        var response=HttpClient.newHttpClient().send(request,HttpResponse.BodyHandlers.ofString());
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.body()).isEqualTo("GET /api/patients/me Bearer test-forwarding-only");
+    }
 }

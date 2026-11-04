@@ -65,4 +65,35 @@ class PatientSecurityTest {
   mvc.perform(get("/api/patients/"+PatientApiContract.id(json)).header("Authorization",token(alice,"PATIENT"))).andExpect(status().isForbidden());
   mvc.perform(post("/api/patients").header("Authorization",token(alice,"PATIENT")).contentType("application/json").content(PatientApiContract.createJson("old@example.com"))).andExpect(status().isConflict());
  }
+
+ @Test void meFindsOnlyTheAuthenticatedAccountAndNeverClaimsLegacyProfiles() throws Exception {
+  String a=token(alice,"PATIENT"),b=token(bob,"PATIENT");
+  mvc.perform(get("/api/patients/me").header("Authorization",a)).andExpect(status().isNotFound());
+  String json=mvc.perform(post("/api/patients").header("Authorization",a).contentType("application/json")
+   .content(PatientApiContract.createJson("alice@example.com"))).andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+  mvc.perform(get("/api/patients/me").header("Authorization",a)).andExpect(status().isOk())
+   .andExpect(header().string("Cache-Control","no-store"))
+   .andExpect(jsonPath("$.id").value(PatientApiContract.id(json)));
+  mvc.perform(get("/api/patients/me").header("Authorization",b)).andExpect(status().isNotFound());
+  mvc.perform(post("/api/patients").header("Authorization",token(UUID.randomUUID().toString(),"ADMIN"))
+   .contentType("application/json").content(PatientApiContract.createJson("legacy@example.com"))).andExpect(status().isCreated());
+  mvc.perform(get("/api/patients/me").header("Authorization",b)).andExpect(status().isNotFound());
+  String bobJson=mvc.perform(post("/api/patients").header("Authorization",b).contentType("application/json")
+   .content(PatientApiContract.createJson("bob@example.com"))).andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+  mvc.perform(get("/api/patients/me").header("Authorization",b)).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(PatientApiContract.id(bobJson)));
+  mvc.perform(get("/api/patients/me").header("Authorization",a)).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(PatientApiContract.id(json)));
+ }
+ @Test void meRequiresPatientRoleAndRejectsMissingOrExpiredTokens() throws Exception {
+  mvc.perform(get("/api/patients/me")).andExpect(status().isUnauthorized());
+  for(String role:List.of("ADMIN","DOCTOR")) mvc.perform(get("/api/patients/me").header("Authorization",token(alice,role))).andExpect(status().isForbidden());
+  mvc.perform(get("/api/patients/me").header("Authorization",token(alice,"PATIENT","mediconnect-auth","mediconnect-api",Instant.now().minusSeconds(300))))
+   .andExpect(status().isUnauthorized());
+ }
+ @Test void meDoesNotReturnADeactivatedProfile() throws Exception {
+  String a=token(alice,"PATIENT");
+  String json=mvc.perform(post("/api/patients").header("Authorization",a).contentType("application/json")
+   .content(PatientApiContract.createJson("alice@example.com"))).andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+  mvc.perform(delete("/api/patients/"+PatientApiContract.id(json)).header("Authorization",a)).andExpect(status().isNoContent());
+  mvc.perform(get("/api/patients/me").header("Authorization",a)).andExpect(status().isNotFound());
+ }
 }

@@ -1137,3 +1137,51 @@ main {
     transition: none !important;
   }
 }
+
+/* Phase 6: account forms and pagination extend the existing visual language. */
+.account-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.auth-page {
+  max-width: 760px;
+}
+.auth-page .patient-form {
+  max-width: 580px;
+}
+.patient-form textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  font: inherit;
+  border: 1px solid #c8d2cc;
+  border-radius: 8px;
+  background: white;
+}
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+.appointment-info {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+@media (max-width: 700px) {
+  .account-nav {
+    gap: 0.7rem;
+  }
+  .site-header {
+    flex-wrap: wrap;
+  }
+  .pagination {
+    gap: 0.5rem;
+  }
+}

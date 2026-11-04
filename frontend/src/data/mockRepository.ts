@@ -1,5 +1,5 @@
 import { doctors } from "./doctors";
-import type { AppointmentStorage, HealthcareRepository } from "./contracts";
+import type { AppointmentStorage, DemoHealthcareRepository } from "./contracts";
 import {
   cancelBooking,
   createSlots,
@@ -11,7 +11,7 @@ export function createMockRepository(
   storage: AppointmentStorage,
   clock = () => new Date(),
   nextId: () => string = () => crypto.randomUUID(),
-): HealthcareRepository {
+): DemoHealthcareRepository {
   const delay = () => new Promise((resolve) => setTimeout(resolve, 100));
   const requireDoctor = (id: string) => {
     if (!doctors.some((doctor) => doctor.id === id))

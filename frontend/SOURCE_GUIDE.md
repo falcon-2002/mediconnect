@@ -1,3 +1,5 @@
+> Historical guide: this file describes the original offline frontend. For the current HTTP-backed Phase 6 implementation, use `README.md`, the source files, and `../backend/docs/PHASE_6.md`. Do not copy this historical snapshot over the current project.
+
 # MediConnect — complete project and source guide
 
 This companion contains the complete source tree and the contents of every hand-authored key file. Download the ZIP for the ready-to-run directory, including the generated package-lock.json. No backend credentials are needed.

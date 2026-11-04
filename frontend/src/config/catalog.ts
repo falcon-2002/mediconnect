@@ -39,7 +39,7 @@ export const specialties = [
 export type SpecialtyId = (typeof specialties)[number]["id"];
 export const locations = ["Rourkela", "Bengaluru", "Bhubaneswar"] as const;
 export type City = (typeof locations)[number];
-export const specialtyLabel = (id: SpecialtyId) =>
-  specialties.find((s) => s.id === id)!.label;
+export const specialtyLabel = (id: string) =>
+  specialties.find((s) => s.id === id)?.label ?? id;
 export const clinicTimeZone = "Asia/Kolkata";
 export const sessionStorageKey = "mediconnect.demo.appointments.v1";

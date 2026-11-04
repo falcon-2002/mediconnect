@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PatientRepository extends JpaRepository<Patient, UUID> {
     Optional<Patient> findByIdAndActiveTrue(UUID id);
+    Optional<Patient> findByAccountIdAndActiveTrue(UUID accountId);
     Page<Patient> findByActiveTrue(Pageable pageable);
     boolean existsByEmail(String email);
     boolean existsByIdAndAccountId(UUID id, UUID accountId);
