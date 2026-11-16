@@ -23,9 +23,11 @@ services:
     profiles: ["full"]
     build:
       context: .
-      dockerfile: patient-service/Dockerfile
+      dockerfile: Dockerfile
     environment:
       SERVER_ADDRESS: 0.0.0.0
+      SERVER_PORT: 8081
+      PORT: 8081
       PATIENT_DB_URL: jdbc:mysql://patient-db:3306/mediconnect_patient?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
       PATIENT_DB_USER: patient_app
       PATIENT_DB_PASSWORD: ${PATIENT_DB_PASSWORD:-local_patient_password}

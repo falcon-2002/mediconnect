@@ -1,0 +1,184 @@
+# REVIEW BEFORE APPLYING: six PAID 1 CPU / 2 GB services (~$150/month compute).
+# No resources are created by this file alone. Obtain explicit cost approval first.
+# TiDB Starter is external; this Blueprint creates no database and copies no local data.
+services:
+  - type: pserv
+    name: mediconnect-discovery-server
+    runtime: docker
+    plan: 1c-2g
+    region: singapore
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    autoDeployTrigger: "off"
+    envVars:
+      - fromGroup: mediconnect-runtime
+      - key: SERVICE
+        value: discovery-server
+      - key: SERVICE_HOSTNAME
+        fromService:
+          name: mediconnect-discovery-server
+          type: pserv
+          property: host
+  - type: pserv
+    name: mediconnect-auth-service
+    runtime: docker
+    plan: 1c-2g
+    region: singapore
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    autoDeployTrigger: "off"
+    envVars:
+      - fromGroup: mediconnect-runtime
+      - key: SERVICE
+        value: auth-service
+      - key: SERVICE_HOSTNAME
+        fromService:
+          name: mediconnect-auth-service
+          type: pserv
+          property: host
+      - key: DISCOVERY_HOSTPORT
+        fromService:
+          name: mediconnect-discovery-server
+          type: pserv
+          property: hostport
+      - key: AUTH_DB_URL
+        sync: false
+      - key: AUTH_DB_USER
+        sync: false
+      - key: AUTH_DB_PASSWORD
+        sync: false
+      - key: SPRING_PROFILES_ACTIVE
+        value: render,tidb
+      - key: JWT_PUBLIC_KEY
+        value: file:/etc/secrets/jwt-public.pem
+      - key: JWT_PRIVATE_KEY
+        value: file:/etc/secrets/jwt-private.pem
+  - type: pserv
+    name: mediconnect-patient-service
+    runtime: docker
+    plan: 1c-2g
+    region: singapore
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    autoDeployTrigger: "off"
+    envVars:
+      - fromGroup: mediconnect-runtime
+      - key: SERVICE
+        value: patient-service
+      - key: SERVICE_HOSTNAME
+        fromService:
+          name: mediconnect-patient-service
+          type: pserv
+          property: host
+      - key: DISCOVERY_HOSTPORT
+        fromService:
+          name: mediconnect-discovery-server
+          type: pserv
+          property: hostport
+      - key: PATIENT_DB_URL
+        sync: false
+      - key: PATIENT_DB_USER
+        sync: false
+      - key: PATIENT_DB_PASSWORD
+        sync: false
+      - key: SPRING_PROFILES_ACTIVE
+        value: render,tidb
+      - key: JWT_PUBLIC_KEY
+        value: file:/etc/secrets/jwt-public.pem
+  - type: pserv
+    name: mediconnect-doctor-service
+    runtime: docker
+    plan: 1c-2g
+    region: singapore
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    autoDeployTrigger: "off"
+    envVars:
+      - fromGroup: mediconnect-runtime
+      - key: SERVICE
+        value: doctor-service
+      - key: SERVICE_HOSTNAME
+        fromService:
+          name: mediconnect-doctor-service
+          type: pserv
+          property: host
+      - key: DISCOVERY_HOSTPORT
+        fromService:
+          name: mediconnect-discovery-server
+          type: pserv
+          property: hostport
+      - key: DOCTOR_DB_URL
+        sync: false
+      - key: DOCTOR_DB_USER
+        sync: false
+      - key: DOCTOR_DB_PASSWORD
+        sync: false
+      - key: SPRING_PROFILES_ACTIVE
+        value: render,tidb
+      - key: JWT_PUBLIC_KEY
+        value: file:/etc/secrets/jwt-public.pem
+  - type: pserv
+    name: mediconnect-appointment-service
+    runtime: docker
+    plan: 1c-2g
+    region: singapore
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    autoDeployTrigger: "off"
+    envVars:
+      - fromGroup: mediconnect-runtime
+      - key: SERVICE
+        value: appointment-service
+      - key: SERVICE_HOSTNAME
+        fromService:
+          name: mediconnect-appointment-service
+          type: pserv
+          property: host
+      - key: DISCOVERY_HOSTPORT
+        fromService:
+          name: mediconnect-discovery-server
+          type: pserv
+          property: hostport
+      - key: APPOINTMENT_DB_URL
+        sync: false
+      - key: APPOINTMENT_DB_USER
+        sync: false
+      - key: APPOINTMENT_DB_PASSWORD
+        sync: false
+      - key: SPRING_PROFILES_ACTIVE
+        value: render,tidb
+      - key: JWT_PUBLIC_KEY
+        value: file:/etc/secrets/jwt-public.pem
+  - type: web
+    name: mediconnect-api-gateway
+    runtime: docker
+    plan: 1c-2g
+    region: singapore
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    autoDeployTrigger: "off"
+    healthCheckPath: /actuator/health
+    envVars:
+      - fromGroup: mediconnect-runtime
+      - key: SERVICE
+        value: api-gateway
+      - key: SERVICE_HOSTNAME
+        fromService:
+          name: mediconnect-api-gateway
+          type: web
+          property: host
+      - key: DISCOVERY_HOSTPORT
+        fromService:
+          name: mediconnect-discovery-server
+          type: pserv
+          property: hostport
+
+envVarGroups:
+  - name: mediconnect-runtime
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: PORT
+        value: "10000"
+      - key: JWT_ISSUER
+        value: mediconnect-auth

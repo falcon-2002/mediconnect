@@ -1,5 +1,16 @@
-**/target
-.git
-.env
-docs
-requests
+# Only Maven descriptors and production Java/resources enter the build context.
+**
+!pom.xml
+!deploy-entrypoint.sh
+!*/
+!*/pom.xml
+!*/src/
+!*/src/main/
+!*/src/main/**
+**/application-local.*
+**/.env*
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/*.jks

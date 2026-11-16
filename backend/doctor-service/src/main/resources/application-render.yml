@@ -1,0 +1,52 @@
+# Activated only by SPRING_PROFILES_ACTIVE=render.
+server:
+  port: ${PORT:10000}
+  address: 0.0.0.0
+  shutdown: graceful
+  forward-headers-strategy: framework
+  tomcat:
+    threads:
+      max: 50
+      min-spare: 2
+    max-connections: 512
+spring:
+  datasource:
+    url: ${DOCTOR_DB_URL}
+    username: ${DOCTOR_DB_USER}
+    password: ${DOCTOR_DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      data-source-properties:
+        sslMode: VERIFY_IDENTITY
+        trustCertificateKeyStoreUrl: ${MYSQL_TRUSTSTORE_URL:}
+        trustCertificateKeyStorePassword: ${MYSQL_TRUSTSTORE_PASSWORD:}
+        trustCertificateKeyStoreType: PKCS12
+        fallbackToSystemTrustStore: true
+  flyway:
+    clean-disabled: true
+    validate-on-migrate: true
+  lifecycle:
+    timeout-per-shutdown-phase: 25s
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${DISCOVERY_HOSTPORT}/eureka/
+  instance:
+    prefer-ip-address: false
+    hostname: ${SERVICE_HOSTNAME}
+    instance-id: ${spring.application.name}:${random.uuid}
+    non-secure-port: ${server.port}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

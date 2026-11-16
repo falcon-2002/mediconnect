@@ -30,6 +30,13 @@ Thumbs.db
 # Runtime logs
 logs/
 
+# Cloud CLI state and local certificate keystores
+.netlify/
+*.p12
+*.pfx
+*.jks
+*.keystore
+
 # Runtime signing keys; public test fixtures are deliberate.
 *.pem
 !backend/*/src/test/resources/test-*.pem
