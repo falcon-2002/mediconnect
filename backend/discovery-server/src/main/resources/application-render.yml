@@ -1,0 +1,26 @@
+# Eureka is private on Render; never expose its registry/dashboard publicly.
+server:
+  port: ${PORT:10000}
+  address: 0.0.0.0
+  shutdown: graceful
+  tomcat:
+    threads:
+      max: 50
+      min-spare: 2
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 25s
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${SERVICE_HOSTNAME}:${server.port}/eureka/
+  instance:
+    hostname: ${SERVICE_HOSTNAME}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

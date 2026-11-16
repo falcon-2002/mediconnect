@@ -1,0 +1,18 @@
+# Add after render: SPRING_PROFILES_ACTIVE=render,tidb (database services only).
+# No migrations are rewritten; the profile's callback checks TiDB before migrating.
+spring:
+  datasource:
+    hikari:
+      max-lifetime: 300000
+      keepalive-time: 120000
+      data-source-properties:
+        sslMode: VERIFY_IDENTITY
+        enabledTLSProtocols: TLSv1.2,TLSv1.3
+        characterEncoding: UTF-8
+        connectionCollation: utf8mb4_0900_bin
+        connectionTimeZone: UTC
+        forceConnectionTimeZoneToSession: true
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    properties:
+      hibernate.jdbc.time_zone: UTC

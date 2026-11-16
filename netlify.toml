@@ -1,0 +1,12 @@
+[build]
+  base = "frontend"
+  command = "npm run build && node ../deployment/netlify-routing.mjs"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "24"
+  NPM_FLAGS = "--include=dev"
+
+# API rules are generated first, followed by the React Router fallback.
+# API_GATEWAY_ORIGIN must be supplied in the Netlify build environment.
+# No VITE_* variable or backend credential is needed in the browser bundle.
