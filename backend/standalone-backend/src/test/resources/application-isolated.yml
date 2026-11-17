@@ -1,0 +1,20 @@
+# Test-classpath only. Never packaged into the production image.
+mediconnect:
+  migrations-enabled: true
+  databases:
+    auth:
+      url: jdbc:h2:mem:standalone_auth;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+      username: sa
+      password: synthetic-isolated-only
+    patient:
+      url: jdbc:h2:mem:standalone_patient;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+      username: sa
+      password: synthetic-isolated-only
+    doctor:
+      url: jdbc:h2:mem:standalone_doctor;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+      username: sa
+      password: synthetic-isolated-only
+    appointment:
+      url: jdbc:h2:mem:standalone_appointment;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+      username: sa
+      password: synthetic-isolated-only

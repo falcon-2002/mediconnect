@@ -24,4 +24,8 @@
     <module>discovery-server</module>
     <module>api-gateway</module>
   </modules>
+  <profiles>
+    <!-- Opt-in deployment adapter; the original six-module reactor is unchanged. -->
+    <profile><id>standalone</id><modules><module>standalone-backend</module></modules></profile>
+  </profiles>
 </project>

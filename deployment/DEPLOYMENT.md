@@ -1,5 +1,7 @@
 # MediConnect: Render + Netlify + TiDB Cloud Starter deployment
 
+Current no-card Render Free candidate: see [RENDER_FREE.md](RENDER_FREE.md) and the separate [render-free.yaml](../render-free.yaml). The six-service paid Blueprint below is preserved and is not approved for provisioning. The standalone branch and its proposed GitHub Actions container check still require commit/push approval; the Linux check has not run.
+
 Prepared 16 November 2026 and updated for the owner's TiDB Cloud Starter account. The owner has approved the deployment-source commit/push only, with message `Prepare Render Netlify and TiDB deployment`. No database connection or modification, resource provisioning, paid service, or public deployment is authorized in this review. Existing data and unrelated Phase 3 extraction artifacts are preserved.
 
 ## Review and cost approval before provisioning
@@ -174,9 +176,46 @@ The previous 41 frontend tests/build, 45 backend tests/packages, 26 tooling test
 
 | Account | Agent access confirmed by this review |
 | --- | --- |
-| GitHub | Existing Git origin/authentication path; only the approved source push is used |
-| Render | Integration exists but is not installed/connected; no authenticated CLI available |
-| Netlify | No available matching connector or authenticated CLI found; manual dashboard required |
+| GitHub | Existing authenticated repository access verified; new standalone commit/push is not yet approved |
+| Render | CLI v2.36.0 authenticated; My Workspace. Read-only service/log/config checks confirmed the failed manually created Free service; no resource change performed |
+| Netlify | CLI v27.10.1 authenticated as satya prakash under Falcon Builds; the last read-only inventory found only the unrelated portfolio site |
 | TiDB Cloud Starter | No available matching connector or authenticated CLI found; manual dashboard required. No DB connection authorized or attempted |
 
-The last three rows describe agent access, not whether the owner is signed into a browser. Install/connect Render only if future direct access is wanted; it is not needed to commit or push these source changes. Live TiDB constraint enforcement, metadata/migrations, JDBC TLS, distributed booking concurrency and Linux container execution remain blockers for a public deployment, not for saving the reviewed preparation work.
+The rows describe agent access, including the later 17 November CLI checks, not merely whether the owner is signed into a browser. Render and Netlify login need not be repeated. Live TiDB constraint enforcement, metadata/migrations, JDBC TLS, distributed booking concurrency and Linux container execution remain blockers for a public deployment. The standalone Free path is documented separately; do not apply the paid Blueprint to pursue the no-card goal.
+
+## Remaining setup after the owner's TiDB preflight
+
+The owner now reports the existing MySQL-compatible Starter instance, four databases with zero tables, TiDB 8.5.3, CHECK=1, FK=1, pessimistic mode, NO_AUTO_CREATE_USER present and an empty visible user inventory. These results satisfy the settings expected by the deployment callback, but do not prove full account-inventory visibility, its execution with each app user or successful Flyway migrations. No cloud connection or change was made by the agent in this follow-up.
+
+The read-only inventory is owner-completed. Next follow [TIDB_USERS.md](TIDB_USERS.md), resolve the prefix locally from Connect and review the explicit CREATE/GRANT statements in [tidb-users.proposed.sql](tidb-users.proposed.sql). Refresh only the account/settings checks immediately before manual writes; run one selected statement at a time, with secure password entry outside unverified SQL Editor history. Existing users must not be overwritten or silently adopted. [FLYWAY_PLAN.md](FLYWAY_PLAN.md) describes the separate live migration approval and execution sequence. New source changes in this follow-up are not approved for commit/push by the earlier deployment commit's authorization.
+
+### Cheapest hosting options with the six services preserved
+
+| Configuration | Monthly Render compute before tax/usage | Readiness |
+| --- | ---: | --- |
+| Existing six 1c-2g services | $150 | Current Blueprint; conservative capacity, still needs Linux/cloud/load verification |
+| Discovery/Gateway 512 MB; four DB services 2 GB | $114 | Lower-cost candidate; the two smaller services must be measured first |
+| Six 0.5c-512mb services | $42 | Lowest listed always-on paid instance combination for all six; NOT verified to fit or perform adequately |
+| Five paid 512 MB private services + Free public Gateway | $35 | Conditional demo-only alternative; Gateway can send private traffic but spins down, has cold-start/quota limits and can exceed frontend/proxy request timeouts. Memory remains unverified |
+
+These are choices for review, not changes to render.yaml or permission to provision. The practical cheapest always-on candidate to benchmark is $42/month; it cannot be called a proven production sizing. Earlier isolated tests used 256 MB Java heaps, which do not bound total process RSS/native/metaspace/thread memory or simulate Render CPU limits. Docker/cgroup and realistic MySQL/TiDB traffic/load measurements are needed before selecting a smaller plan. Upgrade only the service that exceeds its budget rather than assuming all need 2 GB. The existing image's percentage heap bound is not evidence that 512 MB is sufficient.
+
+Render private services cannot use Free instances. A Free gateway has different reliability behavior despite being able to make outbound private requests. Keep the current $150 Blueprint unchanged until a plan and explicit budget are approved. TiDB spending stays zero and Netlify Free remains quota-limited; no paid resource was created.
+
+Sources: [Render pricing](https://render.com/pricing), [compute plans](https://render.com/docs/compute-plans), [free instance limits](https://render.com/docs/free), [private networking](https://render.com/docs/private-network).
+
+### Remaining dashboard actions
+
+- **TiDB:** existing instance -> Connect for the exact prefix/endpoint; SQL Editor or approved existing TLS admin client for the read-only inventory. An organization/GitHub identity is not an application SQL account. User creation/grants require approval of the resolved proposal; migrations require their own approval. Do not recreate schemas or reset passwords.
+- **Render:** direct access is still unavailable to this agent. An available Render integration is unconnected; connecting GitHub alone does not change this. Once a budget, user/grant plan and migrations are approved, review New -> Blueprint using the existing repo/branch and root render.yaml. Applying it creates billable services and starts initial deployments even though auto-deploy is off. Add JWT secret files through the dashboard; only Auth receives the private key. Do not click Apply in this preparation step.
+- **Netlify:** no matching authenticated connector/CLI was found. After a real Gateway HTTPS origin exists and public deployment is approved, import the same repo/branch with root netlify.toml. Base frontend, publish dist, configured build command and Node 24 are already present. Set build variable API_GATEWAY_ORIGIN to that real origin only. No live origin is known now, so no fabricated value or cloud variable was set. The generated API proxy precedes the SPA fallback and preserves same-origin requests. Do not deploy in this preparation step.
+
+The detailed variable names are unchanged in [.env.example](.env.example). Database passwords/keys belong only in secure local prompts/managers and cloud secret fields, never SQL templates or Git.
+
+### Checks actually executed in this remaining-setup review
+
+- Existing frontend production build: passed TypeScript/Vite; the two known React Router use-client warnings remain non-fatal.
+- Existing Netlify routing tests: two passed; no failures. Netlify TOML parsed and entrypoint shell syntax passed.
+- Render Blueprint passed the cached official JSON Schema plus six-service/private-reference/profile/binding/TLS checks. All six existing packaged JARs and their production profiles were inspected, not rebuilt or started.
+- New SQL templates passed static checks for SELECT/SHOW-only auditing, four CREATE/four scoped GRANT statements, escaped schema wildcard characters, no overwrite/revoke/drop/global-grant operations, and no credential-like content. This is not live SQL syntax/privilege testing: the password markers are intentionally unresolved and non-executable.
+- git diff --check passed. No application source, migration, Blueprint plan, cloud environment, user/grant, data or Git history was changed; only six documentation/proposal files are new or modified and remain unstaged/uncommitted. Earlier unit/API/browser results were not rerun as cloud evidence.

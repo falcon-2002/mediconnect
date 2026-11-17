@@ -1,0 +1,57 @@
+name: MediConnect Render Free container check
+
+# First approved branch push can run this without changing/merging main.
+on:
+  push:
+    branches: [deployment/render-free-single-process]
+    paths:
+      - 'backend/**'
+      - 'deployment/standalone-*.mjs'
+      - 'deployment/container-limits*'
+      - 'deployment/verify-standalone-artifact.py'
+      - 'render-free.yaml'
+      - '.github/workflows/render-free-container.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: render-free-container-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  container-512m:
+    # Public standard runners are free. Do not allocate a runner if visibility changes.
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+      - name: Isolated backend regression tests and package
+        working-directory: backend
+        env:
+          DEBUG: 'false'
+          TRACE: 'false'
+        run: bash mvnw -B -ntp -Pstandalone -pl standalone-backend -am clean package -Dlogging.level.root=WARN
+      - name: Verify production artifact and test harness
+        run: |
+          python3 deployment/verify-standalone-artifact.py
+          node --test deployment/container-limits.test.mjs deployment/netlify-routing.test.mjs
+      - name: Build exact Render image and enforce 512 MiB with no swap
+        env:
+          SMOKE_DURATION_SECONDS: '90'
+        run: |
+          h2_fixture_jar=$(find "$HOME/.m2/repository/com/h2database/h2" -type f -name 'h2-*.jar' ! -name '*sources*' ! -name '*javadoc*' | sort -V | tail -n 1)
+          test -n "$h2_fixture_jar"
+          SMOKE_H2_JAR="$h2_fixture_jar" node deployment/standalone-container-check.mjs --isolated-h2
+      # No deploy step, cloud credentials, Actions cache, uploaded artifacts, or RSA key files.
+      # Only sanitized metrics are written to logs and the job summary.

@@ -1,0 +1,74 @@
+spring:
+  application:
+    name: mediconnect-standalone
+  jpa:
+    open-in-view: false
+  mvc:
+    problemdetails:
+      enabled: true
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+server:
+  address: 0.0.0.0
+  port: ${PORT:10000}
+  shutdown: graceful
+  forward-headers-strategy: framework
+  tomcat:
+    threads:
+      max: 16
+      min-spare: 1
+    max-connections: 128
+    accept-count: 32
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+security:
+  jwt:
+    issuer: ${JWT_ISSUER:mediconnect-auth}
+    public-key: ${JWT_PUBLIC_KEY}
+    private-key: ${JWT_PRIVATE_KEY}
+mediconnect:
+  # Default is read/validate only. Enabling this requires separate migration approval.
+  migrations-enabled: ${MEDICONNECT_MIGRATIONS_ENABLED:false}
+  databases:
+    auth:
+      url: ${AUTH_DB_URL}
+      username: ${AUTH_DB_USER}
+      password: ${AUTH_DB_PASSWORD}
+    patient:
+      url: ${PATIENT_DB_URL}
+      username: ${PATIENT_DB_USER}
+      password: ${PATIENT_DB_PASSWORD}
+    doctor:
+      url: ${DOCTOR_DB_URL}
+      username: ${DOCTOR_DB_USER}
+      password: ${DOCTOR_DB_PASSWORD}
+    appointment:
+      url: ${APPOINTMENT_DB_URL}
+      username: ${APPOINTMENT_DB_USER}
+      password: ${APPOINTMENT_DB_PASSWORD}
+doctor:
+  catalog:
+    specialties:
+      general: General physician
+      dental: Dentist
+      skin: Dermatologist
+      pediatric: Pediatrician
+      gynecology: Gynecologist
+      ent: ENT specialist
+    cities: [Rourkela, Bengaluru, Bhubaneswar]
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+logging:
+  level:
+    org.hibernate.orm.jdbc.bind: OFF
+    org.hibernate.SQL: OFF
+    org.hibernate.engine.jdbc.spi.SqlExceptionHelper: OFF
+    org.hibernate.orm.jdbc.error: OFF
