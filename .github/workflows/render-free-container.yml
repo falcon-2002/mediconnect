@@ -41,7 +41,7 @@ jobs:
         env:
           DEBUG: 'false'
           TRACE: 'false'
-        run: bash mvnw -B -ntp -Pstandalone -pl standalone-backend -am clean package -Dlogging.level.root=WARN
+        run: bash ./mvnw -B -ntp -Pstandalone -pl standalone-backend -am clean package -Dlogging.level.root=WARN
       - name: Verify production artifact and test harness
         run: |
           python3 deployment/verify-standalone-artifact.py
