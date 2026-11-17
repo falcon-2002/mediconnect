@@ -1,6 +1,10 @@
 # TiDB Cloud Starter compatibility and setup
 
+This guide primarily describes the preserved microservice profiles. For the separate single-process candidate, use [RENDER_FREE.md](RENDER_FREE.md): it requires bare, credential-free JDBC URLs without query parameters and supplies verified TLS/UTC/collation properties itself. No live TiDB connection or migration has been executed by the agent.
+
 This is a source/configuration review, not a live database certification. No TiDB connection, SQL query, schema change, credential reset, data import or resource creation was performed. Only offline tests with mocks were used for this addition. Existing MySQL migrations and business logic are unchanged.
+
+Current owner update: the MySQL-compatible Starter instance and all four databases exist with zero tables; the owner reports TiDB 8.5.3, CHECK=1, FK=1, pessimistic mode, NO_AUTO_CREATE_USER present and an empty visible user inventory. Do not recreate those databases or repeat the global-setting change. Follow [TIDB_USERS.md](TIDB_USERS.md) for manual provisioning review, secure password handling and collision-aware resume, then [FLYWAY_PLAN.md](FLYWAY_PLAN.md) for separate migration approval. These owner-reported checks do not verify account-inventory visibility, fresh service-user connections, TLS, grants or migrations.
 
 ## Findings
 

@@ -1,0 +1,49 @@
+# Review only. Do not apply/deploy without approval. The original render.yaml is preserved.
+services:
+  - type: web
+    name: mediconnect-standalone
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: deployment/render-free-single-process
+    dockerContext: ./backend
+    dockerfilePath: ./backend/standalone-backend/Dockerfile
+    autoDeployTrigger: "off"
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: SPRING_PROFILES_ACTIVE
+        value: render-free
+      - key: MEDICONNECT_MIGRATIONS_ENABLED
+        value: "false"
+      - key: JWT_ISSUER
+        value: mediconnect-auth
+      - key: JWT_PUBLIC_KEY
+        value: file:/etc/secrets/jwt-public.pem
+      - key: JWT_PRIVATE_KEY
+        value: file:/etc/secrets/jwt-private.pem
+      - key: AUTH_DB_URL
+        sync: false
+      - key: AUTH_DB_USER
+        sync: false
+      - key: AUTH_DB_PASSWORD
+        sync: false
+      - key: PATIENT_DB_URL
+        sync: false
+      - key: PATIENT_DB_USER
+        sync: false
+      - key: PATIENT_DB_PASSWORD
+        sync: false
+      - key: DOCTOR_DB_URL
+        sync: false
+      - key: DOCTOR_DB_USER
+        sync: false
+      - key: DOCTOR_DB_PASSWORD
+        sync: false
+      - key: APPOINTMENT_DB_URL
+        sync: false
+      - key: APPOINTMENT_DB_USER
+        sync: false
+      - key: APPOINTMENT_DB_PASSWORD
+        sync: false

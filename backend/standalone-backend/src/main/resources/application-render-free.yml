@@ -1,0 +1,4 @@
+# The single-process image activates this profile itself. There is no local DB fallback.
+spring:
+  main:
+    banner-mode: off
